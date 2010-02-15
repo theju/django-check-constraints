@@ -32,3 +32,7 @@ class CheckConstraintTestCase(TestCase):
     def testInvalidFieldLookup(self):
         self.assertRaises(NonExistentFieldError, Check(tax_percentage__lt=10))
 
+
+if __name__ == '__main__':
+    import unittest
+    unittest.main()
