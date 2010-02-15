@@ -3,10 +3,11 @@ from check_constraints import *
 
 class CheckConstraintTestCase(TestCase):
     def testNoKwargArgPassed(self):
-        self.assertRaises(NoKwargsError, Check())
+        self.assertRaises(NoKwargsError, Check)
 
     def testInvalidSyntaxError(self):
-        self.assertRaises(SyntaxError, Check(price_gte=10))
+        x = lambda : Check(price_gte=10)
+        self.assertRaises(SyntaxError, x)
 
     def testVerifyCheckName(self):
         c = Check(price__gte = 10)
@@ -27,10 +28,12 @@ class CheckConstraintTestCase(TestCase):
         self.assertEquals(gen_sql_stmt, sql_stmt)
 
     def testInvalidLookupArg(self):
-        self.assertRaises(KeyError, Check(price__gre=10))
+        x = lambda : Check(price__gre=10)
+        self.assertRaises(KeyError, x)
 
     def testInvalidFieldLookup(self):
-        self.assertRaises(NonExistentFieldError, Check(tax_percentage__lt=10))
+        x = lambda : Check(tax_percentage__lt=10)
+        self.assertRaises(NonExistentFieldError, x)
 
 
 if __name__ == '__main__':
