@@ -40,7 +40,7 @@ class CheckConstraintTestCase(TestCase):
         c.check_name = "check_discount"
         c.validate(opts)
         gen_sql_stmt = c.generate_sql(connection, no_style)
-        sql_stmt = """CONSTRAINT "check_discount" CHECK ( "discount" between ( 10,20 ) )"""
+        sql_stmt = """CONSTRAINT "check_discount" CHECK ( "discount" between 10 AND 20 )"""
         self.assertEquals(gen_sql_stmt, sql_stmt)
 
     def testSQLGen4(self):
@@ -48,7 +48,7 @@ class CheckConstraintTestCase(TestCase):
         c.check_name = "check_gender"
         c.validate(opts)
         gen_sql_stmt = c.generate_sql(connection, no_style)
-        sql_stmt = """CONSTRAINT "check_gender" CHECK ( "gender" in ( 'Male','Female' ) )"""
+        sql_stmt = """CONSTRAINT "check_gender" CHECK ( "gender" in ( 'Male', 'Female' ) )"""
         self.assertEquals(gen_sql_stmt, sql_stmt)
 
     def testSQLGen5(self):
@@ -58,6 +58,14 @@ class CheckConstraintTestCase(TestCase):
         gen_sql_stmt = c.generate_sql(connection, no_style)
         sql_stmt = """CONSTRAINT "check_mfg_date" CHECK ( "mfg_date" > '2010-01-01 00:00:00' )"""
         self.assertEquals(gen_sql_stmt, sql_stmt)
+
+    def testSQLGen6(self):
+        c = Check(name__between = ['john', 'george'])
+        c.check_name = "check_name"
+        x = lambda : c.validate(opts)
+        gen_sql_stmt = c.generate_sql(connection, no_style)
+        sql_stmt = """CONSTRAINT "check_name" CHECK ( "name" between ( 'john', 'george' ) )"""
+        self.assertRaises(NonExistentFieldError, x)
 
     def testCascadedSQLGen(self):
         c = Check(price__gte=0) & Check(price__gte='discount') | Check(price__lte=100)
