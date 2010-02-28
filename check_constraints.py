@@ -80,7 +80,7 @@ class Check(object):
                 # If check condition not in LOOKUP_TABLE, then raise Error.
                 raise KeyError(_(u'%s not found in Lookup Table' %self.check_condition_ul))
             # Data to be validated. This is the Keyword Argument Value.
-            # Bind each check condition in a tuple.
+            # Bind each check condition in a list.
             # [(checked_field,check_condition,validate_data, cascade_condition),]
             sql_row = list((self.checked_field, 
                             self.check_condition, 
@@ -193,7 +193,6 @@ class Check(object):
             elif isinstance(field_val,(date,datetime,time)):
                 # If the data is a date field then convert to
                 # a list to make use of list properties.
-                # Because tuple does not support assignment.
                 check_row[2] = quote_obj(field_val)
 
     def generate_sql(self, connection, style):
