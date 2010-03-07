@@ -6,12 +6,6 @@ from datetime import date, datetime, time
 def quote_obj(obj):
     return "'%s'" %(smart_unicode(obj))
 
-class NonExistentFieldError(Exception):
-    """
-    Error raised when field does not exist.
-    """
-    pass
-
 class NotSupportedError(Exception):
     """
     Error raised when features are not supported
@@ -135,19 +129,11 @@ class Check(object):
         Validates the Check Object. Is called when sql is generated.
         """
         # Contains all the field attribute names defined in the models.
-        all_fields = []
-
-        for field in opts.fields:
-            # Fetch all attribute names of fields.
-            all_fields.append(field.get_attname())
-
         for check_row in self.sql_data:
             field_name = check_row[0]
             field_cond = check_row[1]
             field_val  = check_row[2]
-            if not field_name in all_fields:
-                # Check if checked_field exists among fields.
-                raise NonExistentFieldError(_(u"'%s' field not found" %field_name))
+            opts.get_field_by_name(field_name)
             if isinstance(field_val, str):
                 # There are two cases. One if the check condition is 'like'.
                 # Two if the string is a field as given below:
@@ -159,8 +145,7 @@ class Check(object):
                     replaced_text = replaced_text.replace(".","_")
                     check_row[2]  = quote_obj(replaced_text)
                 else:
-                    if not field_val in all_fields:
-                        raise NonExistentFieldError(_(u"%s field not found" %field_val))
+                    opts.get_field_by_name(field_val)
             # If data is an instance of tuple then has
             # to be part of the 'in' check condition.
             elif isinstance(field_val, (tuple, list)):
@@ -178,8 +163,7 @@ class Check(object):
                         if isinstance(val, (date, datetime, time)):
                             sql_val += quote_obj(val)
                         elif isinstance(val, str):
-                            if not val in all_fields:
-                                raise NonExistentFieldError(_(u"%s field not found." %val))
+                            opts.get_field_by_name(val)
                             sql_val += quote_obj(val)
                         elif isinstance(val, int):
                             sql_val += smart_unicode(val)
