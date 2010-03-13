@@ -91,44 +91,53 @@ class CheckConstraintValidatorTests(TestCase):
         c = Check(price__gte = 10)
         c.check_name = "check_price"
         c.validate(opts)
-        opts.get_fields_by_name('price').validators
+        validators = opts.get_fields_by_name('price').validators
+        self.assertTrue(isinstance(validators[0], GTEValidator))
 
     def testSQLGen2(self):
         c = Check(name__like__upper = 'THEJ%')
         c.check_name = "check_name"
         c.validate(opts)
-        opts.get_fields_by_name('name').validators
+        validators = opts.get_fields_by_name('name').validators
+        self.assertTrue(isinstance(validators[0], LikeValidator))
 
     def testSQLGen3(self):
         c = Check(discount__between = [10, 20])
         c.check_name = "check_discount"
         c.validate(opts)
-        opts.get_fields_by_name('discount').validators
+        validators = opts.get_fields_by_name('discount').validators
+        self.assertTrue(isinstance(validators[0], RangeValidator))
 
     def testSQLGen4(self):
         c = Check(gender__in = ("Male", "Female"))
         c.check_name = "check_gender"
         c.validate(opts)
-        opts.get_fields_by_name('gender').validators
+        validators = opts.get_fields_by_name('gender').validators
+        self.assertTrue(isinstance(validators[0], ListValidator))
 
     def testSQLGen5(self):
         c = Check(mfg_date__gt = datetime(2010,1,1))
         c.check_name = "check_mfg_date"
         c.validate(opts)
-        opts.get_fields_by_name('mfg_date').validators
+        validators = opts.get_fields_by_name('mfg_date').validators
+        self.assertTrue(isinstance(validators[0], GTValidator))
 
     def testSQLGen6(self):
         c = Check(name__between = ['john', 'george'])
         c.check_name = "check_name"
         x = lambda : c.validate(opts)
-        opts.get_fields_by_name('name').validators
+        validators = opts.get_fields_by_name('name').validators
+        self.assertTrue(isinstance(validators[0], RangeValidator))
 
     def testCascadedSQLGen(self):
         c = Check(price__gte=0) & Check(price__gte='discount') | Check(price__lte=100)
         c.check_name = "check_name_price"
         c.validate(opts)
-        opts.get_fields_by_name('price').validators
-
+        validators = opts.get_fields_by_name('price').validators
+        self.assertTrue(isinstance(validators[0], GTEValidator))
+        self.assertTrue(isinstance(validators[1], GTEValidator))
+        self.assertTrue(isinstance(validators[2], LTEValidator))
+            
 
 if __name__ == '__main__':
     import unittest
