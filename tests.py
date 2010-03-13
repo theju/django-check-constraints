@@ -85,6 +85,50 @@ class CheckConstraintTestCase(TestCase):
         self.assertRaises(NonExistentFieldError, x)
 
 
+class CheckConstraintValidatorTests(TestCase):
+    def testSQLGen1(self):
+        c = Check(price__gte = 10)
+        c.check_name = "check_price"
+        c.validate(opts)
+        opts.get_fields_by_name('price').validators
+
+    def testSQLGen2(self):
+        c = Check(name__like__upper = 'THEJ%')
+        c.check_name = "check_name"
+        c.validate(opts)
+        opts.get_fields_by_name('name').validators
+
+    def testSQLGen3(self):
+        c = Check(discount__between = [10, 20])
+        c.check_name = "check_discount"
+        c.validate(opts)
+        opts.get_fields_by_name('discount').validators
+
+    def testSQLGen4(self):
+        c = Check(gender__in = ("Male", "Female"))
+        c.check_name = "check_gender"
+        c.validate(opts)
+        opts.get_fields_by_name('gender').validators
+
+    def testSQLGen5(self):
+        c = Check(mfg_date__gt = datetime(2010,1,1))
+        c.check_name = "check_mfg_date"
+        c.validate(opts)
+        opts.get_fields_by_name('mfg_date').validators
+
+    def testSQLGen6(self):
+        c = Check(name__between = ['john', 'george'])
+        c.check_name = "check_name"
+        x = lambda : c.validate(opts)
+        opts.get_fields_by_name('name').validators
+
+    def testCascadedSQLGen(self):
+        c = Check(price__gte=0) & Check(price__gte='discount') | Check(price__lte=100)
+        c.check_name = "check_name_price"
+        c.validate(opts)
+        opts.get_fields_by_name('price').validators
+
+
 if __name__ == '__main__':
     import unittest
     unittest.main()
