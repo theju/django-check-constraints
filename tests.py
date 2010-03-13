@@ -3,6 +3,7 @@ from django.core.management.color import no_style
 from django.db import connection
 from datetime import datetime
 from check_constraints_app.models import CCTestModel
+from django.db.models.fields import FieldDoesNotExist
 from check_constraints import *
 
 opts = CCTestModel._meta
@@ -65,7 +66,7 @@ class CheckConstraintTestCase(TestCase):
         x = lambda : c.validate(opts)
         gen_sql_stmt = c.generate_sql(connection, no_style)
         sql_stmt = """CONSTRAINT "check_name" CHECK ( "name" between ( 'john', 'george' ) )"""
-        self.assertRaises(NonExistentFieldError, x)
+        self.assertRaises(FieldDoesNotExist, x)
 
     def testCascadedSQLGen(self):
         c = Check(price__gte=0) & Check(price__gte='discount') | Check(price__lte=100)
@@ -82,7 +83,7 @@ class CheckConstraintTestCase(TestCase):
     def testInvalidFieldLookup(self):
         c = Check(tax_percentage__lt=10)
         x = lambda : c.validate(opts)
-        self.assertRaises(NonExistentFieldError, x)
+        self.assertRaises(FieldDoesNotExist, x)
 
 
 class CheckConstraintValidatorTests(TestCase):
