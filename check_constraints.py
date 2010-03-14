@@ -2,6 +2,7 @@ from django.conf import settings
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
 from datetime import date, datetime, time
+from validators import *
 
 def quote_obj(obj):
     return "'%s'" %(smart_unicode(obj))
@@ -44,11 +45,12 @@ class Check(object):
         # The container (list) for storing all the check conditions.
         self.sql_data = []
         # Supported Check Conditions.
-        LOOKUP_TABLE = {u'gte':     u'>=',   u'lte':    u'<=',      u'gt': u'>',
-                        u'lt':      u'<',    u'neq':    u'<>',      u'eq': u'=',
-                        u'in':      u'in',   u'not_in': u'not in',
-                        u'like':    u'like', u'unlike': u'not like', 
-                        u'between': u'between'}
+        LOOKUP_TABLE = {u'gte':     (u'>=', GTEValidator),    u'lte':    (u'<=', LTEValidator),      
+                        u'gt' :     (u'>',  GTValidator),     u'lt' :    (u'<',  LTValidator),    
+                        u'neq':     (u'<>', NEQValidator),    u'eq' :    (u'=',  EQValidator),
+                        u'in' :     (u'in', ListValidator),   u'not_in': (u'not in', NotInListValidator),
+                        u'like':    (u'like', LikeValidator), u'unlike': (u'not like', NotLikeValidator), 
+                        u'between': (u'between', RangeValidator)}
         for (key,val) in kwargs.items():
             # Checking for "__" in the Keyword Arguments.
             if not u"__" in key:
@@ -99,9 +101,9 @@ class Check(object):
 
     def _cascade(self, cascade_condition, sql_data, other):
         sql_row = list((sql_data[len(sql_data)-1][0], 
-                         sql_data[len(sql_data)-1][1], 
-                         sql_data[len(sql_data)-1][2], 
-                         cascade_condition))
+                        sql_data[len(sql_data)-1][1], 
+                        sql_data[len(sql_data)-1][2], 
+                        cascade_condition))
         sql_data[len(sql_data)-1] = sql_row
         sql_data += other.sql_data
         return self.sql_data
@@ -133,13 +135,13 @@ class Check(object):
             field_name = check_row[0]
             field_cond = check_row[1]
             field_val  = check_row[2]
-            opts.get_field_by_name(field_name)
-            if isinstance(field_val, str):
+            field = opts.get_field_by_name(field_name)[0]
+            if isinstance(field_val, (str, unicode)):
                 # There are two cases. One if the check condition is 'like'.
                 # Two if the string is a field as given below:
                 # If data is a string then check if it exists in the fields.
-                # Example: Check(price__lte = 'discount')
-                if field_cond in (u'like', u'not like'):
+                # Example: Check(price__gt = 'discount')
+                if field_cond[0] in (u'like', u'not like'):
                     replaced_text = field_val
                     replaced_text = replaced_text.replace("*","%%")
                     replaced_text = replaced_text.replace(".","_")
@@ -149,35 +151,33 @@ class Check(object):
             # If data is an instance of tuple then has
             # to be part of the 'in' check condition.
             elif isinstance(field_val, (tuple, list)):
-                if not field_cond in (u'in', u'not in', u'between'):
+                if not field_cond[0] in (u'in', u'not in', u'between'):
                    raise SyntaxError(_(u"Expected 'in','not in' or 'between' condition"))
-                field_val_list = list(field_val)
-                if field_cond in (u'in', u'not in'):
+                field_val = list(field_val)
+                if field_cond[0] in (u'in', u'not in'):
                     sql_val = []
-                    for val in field_val_list:
+                    for val in field_val:
                         sql_val.append(quote_obj(val))
                     field_val = u"( %s )" %", ".join(sql_val)
-                if field_cond == u"between":
+                if field_cond[0] == u"between":
                     sql_val = u""
-                    for val in field_val_list:
+                    for val in field_val:
                         if isinstance(val, (date, datetime, time)):
                             sql_val += quote_obj(val)
-                        elif isinstance(val, str):
+                        elif isinstance(val, (str, unicode)):
                             opts.get_field_by_name(val)
                             sql_val += quote_obj(val)
-                        elif isinstance(val, int):
+                        elif isinstance(val, (int, float)):
                             sql_val += smart_unicode(val)
                         else:
                             raise SyntaxError(_(u"Does not support the datatype."))
-                        if field_val_list.index(val) == 0:
+                        if field_val.index(val) == 0:
                             sql_val += u" AND "
                     field_val = sql_val
                 check_row[2] = field_val
-            # If data is an instance of date then get it's actual representation
-            elif isinstance(field_val,(date,datetime,time)):
-                # If the data is a date field then convert to
-                # a list to make use of list properties.
+            elif isinstance(field_val,(date, datetime, time)):
                 check_row[2] = quote_obj(field_val)
+            field.validators.append(field_cond[1](field_val))
 
     def generate_sql(self, connection, style):
         """
@@ -202,7 +202,7 @@ class Check(object):
             if self.upper_or_lower:
                 check_name = u"%s(%s)" %(self.upper_or_lower, check_name)
             constraints_output.append(u"( %s %s %s )" %(check_name, 
-                                                        check_row[1],
+                                                        check_row[1][0],
                                                         check_row[2]))
             if check_row[3]:
                 constraints_output.append(u"%s" %check_row[3])
