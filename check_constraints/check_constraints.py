@@ -1,8 +1,8 @@
+from validators import *
 from django.conf import settings
+from datetime import date, datetime, time
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
-from datetime import date, datetime, time
-from validators import *
 
 def quote_obj(obj):
     return "'%s'" %(smart_unicode(obj))
@@ -132,9 +132,7 @@ class Check(object):
         """
         # Contains all the field attribute names defined in the models.
         for check_row in self.sql_data:
-            field_name = check_row[0]
-            field_cond = check_row[1]
-            field_val  = check_row[2]
+            field_name, field_cond, field_val = check_row
             field = opts.get_field_by_name(field_name)[0]
             if isinstance(field_val, (str, unicode)):
                 # There are two cases. One if the check condition is 'like'.
