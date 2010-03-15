@@ -1,8 +1,8 @@
 diff --git a/django/db/backends/creation.py b/django/db/backends/creation.py
-index a9d730a..595ee7a 100644
+index a9d730a..2d545a9 100644
 --- a/django/db/backends/creation.py
 +++ b/django/db/backends/creation.py
-@@ -73,6 +73,25 @@ class BaseDatabaseCreation(object):
+@@ -73,6 +73,23 @@ class BaseDatabaseCreation(object):
                  else:
                      field_output.extend(ref_output)
              table_output.append(' '.join(field_output))
@@ -13,12 +13,10 @@ index a9d730a..595ee7a 100644
 +        if opts.constraints:
 +            check_name_list = []
 +            for check_row in opts.constraints:
-+                check_name = check_row[0]
-+                check_obj  = check_row[1]
++                check_name, check_obj = check_row
 +                if not check_name in check_name_list:
 +                    check_name_list.append(check_name)
 +                    check_obj.check_name = check_name
-+                    check_obj.validate(opts)
 +                    table_output.append(check_obj.generate_sql(self.connection, style))
 +                else:
 +                    raise Exception(style.ERROR(u"Check name %s already exists." %check_name))
@@ -29,7 +27,7 @@ index a9d730a..595ee7a 100644
              table_output.append(style.SQL_FIELD(qn('_order')) + ' ' + \
                  style.SQL_COLTYPE(models.IntegerField().db_type(connection=self.connection)))
 diff --git a/django/db/models/options.py b/django/db/models/options.py
-index 01a13b4..a3590a1 100644
+index 01a13b4..4914bda 100644
 --- a/django/db/models/options.py
 +++ b/django/db/models/options.py
 @@ -21,7 +21,8 @@ get_verbose_name = lambda class_name: re.sub('(((?<=[a-z])[A-Z])|([A-Z](?![A-Z]|
@@ -42,11 +40,3 @@ index 01a13b4..a3590a1 100644
  
  class Options(object):
      def __init__(self, meta, app_label=None):
-@@ -48,6 +49,7 @@ class Options(object):
-         self.parents = SortedDict()
-         self.duplicate_targets = {}
-         self.auto_created = False
-+        self.constraints = []
- 
-         # To handle various inheritance situations, we need to track where
-         # managers came from (concrete or abstract base classes).
