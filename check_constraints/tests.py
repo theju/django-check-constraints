@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.core.management.color import no_style
 from django.db import connection
 from datetime import datetime
-from check_constraints_app.models import CCTestModel
+from models import CCTestModel
 from django.db.models.fields import FieldDoesNotExist
 from check_constraints import *
 
