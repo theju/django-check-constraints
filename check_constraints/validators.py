@@ -6,18 +6,18 @@ __all__ = ['GTValidator', 'LTValidator', 'GTEValidator', 'LTEValidator',
            'RangeValidator', 'LikeValidator', 'NotLikeValidator']
 
 class GTValidator(validators.MinValueValidator):
-    pass
+    message = _(u'Ensure this value is greater than %(limit_value)s.')
 
 class LTValidator(validators.MaxValueValidator):
-    pass
+    message = _(u'Ensure this value is less than %(limit_value)s.')
 
 class GTEValidator(validators.MinValueValidator):
     compare = lambda self, a, b: a >= b
-    message = _(u'Ensure this value is less than %(limit_value)s.')
+    message = _(u'Ensure this value is less than or equal to %(limit_value)s.')
     
 class LTEValidator(validators.MaxValueValidator):
     compare = lambda self, a, b: a <= b
-    message = _(u'Ensure this value is greater than %(limit_value)s.')
+    message = _(u'Ensure this value is greater than or equal to %(limit_value)s.')
     
 class NEQValidator(validators.BaseValidator):
     compare = lambda self, a, b: a != b
