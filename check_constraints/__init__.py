@@ -1,1 +1,2 @@
 from check_constraints import Check
+from metaclass import CheckConstraintMetaClass
