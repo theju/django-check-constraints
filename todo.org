@@ -1,0 +1,1 @@
+* Check how migrations can be done using South
