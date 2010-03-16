@@ -13,11 +13,11 @@ class LTValidator(validators.MaxValueValidator):
 
 class GTEValidator(validators.MinValueValidator):
     compare = lambda self, a, b: a >= b
-    message = _(u'Ensure this value is less than or equal to %(limit_value)s.')
+    message = _(u'Ensure this value is greater than or equal to %(limit_value)s.')
     
 class LTEValidator(validators.MaxValueValidator):
     compare = lambda self, a, b: a <= b
-    message = _(u'Ensure this value is greater than or equal to %(limit_value)s.')
+    message = _(u'Ensure this value is less than or equal to %(limit_value)s.')
     
 class NEQValidator(validators.BaseValidator):
     compare = lambda self, a, b: a != b
