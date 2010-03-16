@@ -3,7 +3,7 @@ from django.utils.translation import ugettext_lazy as _
 
 __all__ = ['GTValidator', 'LTValidator', 'GTEValidator', 'LTEValidator',
            'NEQValidator', 'EQValidator', 'ListValidator', 'NotInListValidator',
-           'RangeValidator', 'LikeValidator', 'NotLikeValidator']
+           'RangeValidator', 'LikeValidator', 'UnLikeValidator']
 
 class GTValidator(validators.MinValueValidator):
     message = _(u'Ensure this value is greater than %(limit_value)s.')
