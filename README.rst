@@ -29,18 +29,14 @@ by `Simon Blanchard`_.
 INSTALL
 ---------
 
-* Patch your django code with the `django_check_constraints.diff` file.
-
-  .. code:: bash
+* Patch your django code with the `django_check_constraints.diff` file::
 
      $ git apply django_check_constraints.diff
 
 * Add the `check_constraints` app anywhere on your `PYTHONPATH` or just
   add it into your project directory and reference it in the `INSTALLED_APPS`.
 
-* Run the check constraint test suite to figure if everything went well.
-
-  .. code:: bash
+* Run the check constraint test suite to figure if everything went well::
 
      $ python manage.py test check_constraints
 
