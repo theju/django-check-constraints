@@ -39,8 +39,10 @@ class RangeValidator(validators.BaseValidator):
     compare = lambda self, a, b, c: a > b and a < c
     message = _(u'Ensure this value is in range %(limit_value)s')
 
-class LikeValidator(validators.BaseValidator):
+class LikeValidator(validators.RegexValidator):
     pass
 
-class NotLikeValidator(validators.BaseValidator):
-    pass
+class UnLikeValidator(validators.RegexValidator):
+    def __call__(self, value):
+        if self.regex.search(smart_unicode(value)):
+            raise ValidationError(self.message, code=self.code)
