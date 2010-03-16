@@ -49,7 +49,7 @@ class Check(object):
                         u'gt' :     (u'>',  GTValidator),     u'lt' :    (u'<',  LTValidator),    
                         u'neq':     (u'<>', NEQValidator),    u'eq' :    (u'=',  EQValidator),
                         u'in' :     (u'in', ListValidator),   u'not_in': (u'not in', NotInListValidator),
-                        u'like':    (u'like', LikeValidator), u'unlike': (u'not like', NotLikeValidator), 
+                        u'like':    (u'like', LikeValidator), u'unlike': (u'not like', UnLikeValidator), 
                         u'between': (u'between', RangeValidator)}
         for (key,val) in kwargs.items():
             # Checking for "__" in the Keyword Arguments.
@@ -95,9 +95,6 @@ class Check(object):
                                     self.sql_data[i][2], 
                                     self.cascade_condition))
                     self.sql_data[i] = sql_row
-            # Once the keyword argument is processed.
-            # It is removed from the Keyword Argument Dictionary.
-            kwargs.pop(key)
 
     def _cascade(self, cascade_condition, sql_data, other):
         sql_row = list((sql_data[len(sql_data)-1][0], 
